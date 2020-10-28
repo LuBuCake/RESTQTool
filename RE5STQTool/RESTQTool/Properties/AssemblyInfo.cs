@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // As informações gerais sobre um assembly são controladas por
 // conjunto de atributos. Altere estes valores de atributo para modificar as informações
 // associadas a um assembly.
-[assembly: AssemblyTitle("RE5STQTool")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("RESIDENT EVIL STQ Tool")]
+[assembly: AssemblyDescription("Allows the manipulation of MT Framework v1/2 STQ files")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("RE5STQTool")]
-[assembly: AssemblyCopyright("Copyright ©  2020")]
+[assembly: AssemblyCompany("ATLAS CO, LTD.")]
+[assembly: AssemblyProduct("RESIDENT EVIL STQ Tool")]
+[assembly: AssemblyCopyright("ATLAS CO, LTD. (LuBuCake) 2020 All Rights Reserved.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
