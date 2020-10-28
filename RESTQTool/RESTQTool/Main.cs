@@ -39,7 +39,7 @@ namespace RESTQTool
 
             using (OpenFileDialog OpenFile = new OpenFileDialog())
             {
-                OpenFile.Filter = "RE5 STQ files (*.stq)|*.stq";
+                OpenFile.Filter = "STQ files (*.stq)|*.stq";
                 OpenFile.Title = "Select a valid STQ file";
 
                 if (OpenFile.ShowDialog() == DialogResult.OK)
