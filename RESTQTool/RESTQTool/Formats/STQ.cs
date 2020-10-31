@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 
 namespace RESTQTool
 {
@@ -13,6 +14,9 @@ namespace RESTQTool
         public int Version;
         public int NumSounds;
 
+        public int Mode;
+        private int Start;
+
         public int[] FileNamePos;
         public string[] FileName;
         public int[] FileSize;
@@ -20,6 +24,14 @@ namespace RESTQTool
         public int[] Channels;
         public int[] LoopStart;
         public int[] LoopEnd;
+
+        private int[] SupportedVersions =
+        {
+            18, // RE5
+            28, // RE6
+            1,  // REV1
+            2   // REV2
+        };
 
         public STQ(string FilePath)
         {
@@ -49,16 +61,41 @@ namespace RESTQTool
             LoopStart = new int[NumSounds];
             LoopEnd = new int[NumSounds];
 
+            switch(Version)
+            {
+                case 18:
+                case 28:
+                    Mode = 1; // RE5 or RE6
+                    Start = 0x3C;
+                    break;
+                case 1:
+                case 2:
+                    Mode = 2; // REV1 or REV2
+                    Start = 0x38;
+                    break;
+            }
+
             for (int i = 0; i < NumSounds; i++)
             {
-                BR.BaseStream.Position = 0x3C + (0x18 * i);
+                BR.BaseStream.Position = Start + ((Mode == 1 ? 0x18 : 0x24) * i);
 
                 FileNamePos[i] = BR.ReadInt32();
                 FileSize[i] = BR.ReadInt32();
                 Duration[i] = BR.ReadInt32();
                 Channels[i] = BR.ReadInt32();
-                LoopStart[i] = BR.ReadInt32();
-                LoopEnd[i] = BR.ReadInt32();
+
+                if (Mode == 1)
+                {
+                    LoopStart[i] = BR.ReadInt32();
+                    LoopEnd[i] = BR.ReadInt32();
+                }
+                else
+                {
+                    BR.BaseStream.Position += 4; // Skip sample frequency (Should aways be 48000 Hz)
+
+                    LoopStart[i] = BR.ReadInt32();
+                    LoopEnd[i] = BR.ReadInt32();
+                }
             }
 
             for (int i = 0; i < NumSounds; i++)
@@ -109,7 +146,7 @@ namespace RESTQTool
 
         public bool CheckSTQ()
         {
-            return Format == "STRQ" && (Version == 18 || Version == 28);
+            return (Format == "STRQ" || Format == "STQR") && SupportedVersions.Contains(Version);
         }
     }
 }
