@@ -84,18 +84,11 @@ namespace RESTQTool
                 Duration[i] = BR.ReadInt32();
                 Channels[i] = BR.ReadInt32();
 
-                if (Mode == 1)
-                {
-                    LoopStart[i] = BR.ReadInt32();
-                    LoopEnd[i] = BR.ReadInt32();
-                }
-                else
-                {
-                    BR.BaseStream.Position += 4; // Skip sample frequency (Should aways be 48000 Hz)
+                if (Mode == 2)
+                    BR.BaseStream.Position += 4;
 
-                    LoopStart[i] = BR.ReadInt32();
-                    LoopEnd[i] = BR.ReadInt32();
-                }
+                LoopStart[i] = BR.ReadInt32();
+                LoopEnd[i] = BR.ReadInt32();
             }
 
             for (int i = 0; i < NumSounds; i++)
@@ -119,12 +112,16 @@ namespace RESTQTool
 
             for (int i = 0; i < NumSounds; i++)
             {
-                BW.BaseStream.Position = 0x3C + (0x18 * i);
+                BW.BaseStream.Position = Start + ((Mode == 1 ? 0x18 : 0x24) * i);
 
                 BW.Write(FileNamePos[i]);
                 BW.Write(FileSize[i]);
                 BW.Write(Duration[i]);
                 BW.Write(Channels[i]);
+
+                if (Mode == 2)
+                    BW.BaseStream.Position += 4;
+
                 BW.Write(LoopStart[i]);
                 BW.Write(LoopEnd[i]);
             }
