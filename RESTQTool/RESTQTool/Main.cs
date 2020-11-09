@@ -126,13 +126,14 @@ namespace RESTQTool
 
             try
             {
+                string filename = SoundFileBox.Text;
                 int filesize = int.Parse(FileSizeBox.Text);
                 int duration = int.Parse(DurationBox.Text);
                 int channels = int.Parse(ChannelBox.Text);
                 int loopstart = int.Parse(LoopStartBox.Text);
                 int loopend = int.Parse(LoopEndBox.Text);
 
-                WorkingSTQ.ReplaceData(SoundComboBox.SelectedIndex, filesize, duration, channels, loopstart, loopend);
+                WorkingSTQ.ReplaceData(SoundComboBox.SelectedIndex, filename, filesize, duration, channels, loopstart, loopend);
 
                 MessageBox.Show("Data entry updated!", "Yay!", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
             }

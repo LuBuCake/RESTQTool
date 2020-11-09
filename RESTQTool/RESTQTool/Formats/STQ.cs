@@ -31,6 +31,8 @@ namespace RESTQTool
         public int Version;
         public int NumSounds;
 
+        public byte[] HeaderData;
+
         public int Mode;
         private int Start;
 
@@ -39,8 +41,11 @@ namespace RESTQTool
         public int[] FileSize;
         public int[] Duration;
         public int[] Channels;
+        public int[] SampleRate;
         public int[] LoopStart;
         public int[] LoopEnd;
+
+        public byte[] UnknownData;
 
         private int[] SupportedVersions =
         {
@@ -70,14 +75,6 @@ namespace RESTQTool
             Version = BR.ReadInt32();
             NumSounds = BR.ReadInt32();
 
-            FileNamePos = new int[NumSounds];
-            FileName = new string[NumSounds];
-            FileSize = new int[NumSounds];
-            Duration = new int[NumSounds];
-            Channels = new int[NumSounds];
-            LoopStart = new int[NumSounds];
-            LoopEnd = new int[NumSounds];
-
             switch(Version)
             {
                 case 18:
@@ -92,27 +89,42 @@ namespace RESTQTool
                     break;
             }
 
+            int HeaderDataSize = (int)(Start - BR.BaseStream.Position);
+            HeaderData = new byte[HeaderDataSize];
+            HeaderData = BR.ReadBytes(HeaderDataSize);
+
+            FileNamePos = new int[NumSounds];
+            FileName = new string[NumSounds];
+            FileSize = new int[NumSounds];
+            Duration = new int[NumSounds];
+            Channels = new int[NumSounds];
+            SampleRate = new int[NumSounds];
+            LoopStart = new int[NumSounds];
+            LoopEnd = new int[NumSounds];
+
             for (int i = 0; i < NumSounds; i++)
             {
-                BR.BaseStream.Position = Start + ((Mode == 1 ? 0x18 : 0x24) * i);
-
                 FileNamePos[i] = BR.ReadInt32();
                 FileSize[i] = BR.ReadInt32();
                 Duration[i] = BR.ReadInt32();
                 Channels[i] = BR.ReadInt32();
 
                 if (Mode == 2)
-                    BR.BaseStream.Position += 4;
+                    SampleRate[i] = BR.ReadInt32();
 
                 LoopStart[i] = BR.ReadInt32();
                 LoopEnd[i] = BR.ReadInt32();
             }
 
+            int UnknownDataSize = (int)(FileNamePos[0] - BR.BaseStream.Position);
+            UnknownData = new byte[UnknownDataSize];
+            UnknownData = BR.ReadBytes(UnknownDataSize);
+
             for (int i = 0; i < NumSounds; i++)
             {
                 BR.BaseStream.Position = FileNamePos[i];
 
-                for (int j = 0; j < (((i + 1) < NumSounds ? FileNamePos[i + 1] : FS.Length) - FileNamePos[i]); j++)
+                for (int j = 0; j < (((i + 1) < NumSounds ? FileNamePos[i + 1] : FS.Length) - FileNamePos[i]) - 1; j++)
                 {
                     FileName[i] += (char)BR.ReadByte();
                 }
@@ -124,36 +136,62 @@ namespace RESTQTool
 
         public void SaveSTQ()
         {
-            FS = new FileStream(FileDir, FileMode.Open);
+            FS = new FileStream(FileDir, FileMode.Create);
             BW = new BinaryWriter(FS);
+
+            BW.Write(Format.ToCharArray());
+            BW.Write(Version);
+            BW.Write(NumSounds);
+            BW.Write(HeaderData);
 
             for (int i = 0; i < NumSounds; i++)
             {
-                BW.BaseStream.Position = Start + ((Mode == 1 ? 0x18 : 0x24) * i);
-
                 BW.Write(FileNamePos[i]);
                 BW.Write(FileSize[i]);
                 BW.Write(Duration[i]);
                 BW.Write(Channels[i]);
 
                 if (Mode == 2)
-                    BW.BaseStream.Position += 4;
+                    BW.Write(SampleRate[i]);
 
                 BW.Write(LoopStart[i]);
                 BW.Write(LoopEnd[i]);
+            }
+
+            BW.Write(UnknownData);
+
+            for (int i = 0; i < NumSounds; i++)
+            {
+                BW.Write(FileName[i].ToCharArray());
+                BW.Write((byte)0);
             }
 
             FS.Dispose();
             BW.Dispose();
         }
 
-        public void ReplaceData(int index, int filesize, int duration, int channels, int loopstart, int loopend)
+        public void ReplaceData(int index, string filename, int filesize, int duration, int channels, int loopstart, int loopend)
         {
+            FileName[index] = filename;
             FileSize[index] = filesize;
             Duration[index] = duration;
             Channels[index] = channels;
             LoopStart[index] = loopstart;
             LoopEnd[index] = loopend;
+
+            UpdateFileNamePositions();
+        }
+
+        private void UpdateFileNamePositions()
+        {
+            int BaseOffset = FileNamePos[0];
+            int TempOffset = BaseOffset;
+
+            for (int i = 1; i < NumSounds; i++)
+            {
+                TempOffset += FileName[i - 1].ToCharArray().Length + 1;
+                FileNamePos[i] = TempOffset;
+            }
         }
 
         // Utils

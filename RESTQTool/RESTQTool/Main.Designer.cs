@@ -242,7 +242,6 @@ namespace RESTQTool
             this.SoundFileBox.Font = new System.Drawing.Font("Calibri Light", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.SoundFileBox.Location = new System.Drawing.Point(98, 24);
             this.SoundFileBox.Name = "SoundFileBox";
-            this.SoundFileBox.ReadOnly = true;
             this.SoundFileBox.Size = new System.Drawing.Size(286, 21);
             this.SoundFileBox.TabIndex = 3;
             // 
