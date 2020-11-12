@@ -15,5 +15,5 @@ Detailed information and instructions at the [Original Topic](https://residentev
 
 ## License
 
-RESIDENT STQ Tool Tool codebase is  licensed under GPL V3.0.
+RESIDENT STQ Tool codebase is  licensed under GPL V3.0.
 Please refer to the LICENSE file for detailed information.
